@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Preços · Impressão 3D</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="512x512" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Calc. 3D">
+<meta name="theme-color" content="#fdf0f2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fdf0f2;
+    --bg-card:#ffffff;
+    --bg-input:#fdf5f4;
+    --border:#f4cfd7;
+    --border-soft:#f2dde1;
+    --text:#4a3b3f;
+    --text-muted:#aa8d93;
+    --amber:#ef8fa6;
+    --amber-dark:#d9718c;
+    --teal:#6fc3ae;
+    --danger:#e2694f;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:28px 16px 64px;
+  }
+  .wrap{max-width:460px;margin:0 auto;}
+
+  header.brand{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:22px;
+  }
+  .brand-mark{
+    width:46px;height:46px;flex:0 0 46px;
+    border:1.5px solid var(--amber);
+    border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Sora',sans-serif;
+    font-weight:700;
+    color:var(--amber);
+    font-size:15px;
+    letter-spacing:0.5px;
+  }
+  .brand-text h1{
+    font-family:'Sora',sans-serif;
+    font-size:19px;
+    font-weight:700;
+    margin:0 0 3px;
+    letter-spacing:-0.2px;
+  }
+  .brand-text p{
+    margin:0;
+    font-size:13px;
+    color:var(--text-muted);
+    line-height:1.4;
+  }
+
+  .tabs{
+    display:flex;
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:4px;
+    margin-bottom:22px;
+  }
+  .tabs button{
+    flex:1;
+    border:none;
+    background:transparent;
+    color:var(--text-muted);
+    font-family:'Sora',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    padding:11px 0;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .18s ease, color .18s ease;
+  }
+  .tabs button.active{
+    background:linear-gradient(135deg,var(--amber),var(--amber-dark));
+    color:#4a3b3f;
+  }
+
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px 20px;
+    margin-bottom:16px;
+  }
+
+  .step-tag{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .step-tag .num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    font-weight:600;
+    color:var(--amber);
+    border-left:2px solid var(--amber);
+    padding-left:8px;
+    letter-spacing:1px;
+  }
+  .step-tag h2{
+    font-family:'Sora',sans-serif;
+    font-size:16px;
+    font-weight:700;
+    margin:0;
+  }
+
+  label{
+    display:block;
+    font-size:13px;
+    color:var(--text-muted);
+    margin:14px 0 6px;
+  }
+  label:first-of-type{margin-top:0;}
+
+  input[type=text], input[type=number], select{
+    width:100%;
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    padding:12px 13px;
+    border-radius:10px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  input:focus, select:focus{border-color:var(--amber);}
+  input::placeholder{color:#cba7ad;}
+  select{appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%238a93a0' stroke-width='1.6' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+    padding-right:36px;
+  }
+  .hint{font-size:12px;color:#b8949a;margin-top:4px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+  /* pro toggle rows */
+  .toggle-row{
+    border:1px solid var(--border-soft);
+    border-radius:10px;
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  .toggle-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:13px 14px;
+    cursor:pointer;
+  }
+  .toggle-head span{font-size:14.5px;font-weight:500;}
+  .switch{
+    width:42px;height:24px;border-radius:999px;
+    background:#ecd4d9;position:relative;flex:0 0 42px;
+    transition:background .18s ease;
+  }
+  .switch::after{
+    content:'';position:absolute;top:3px;left:3px;
+    width:18px;height:18px;border-radius:50%;
+    background:#ffffff;
+    transition:transform .18s ease, background .18s ease;
+  }
+  .toggle-row.on .switch{background:linear-gradient(135deg,var(--amber),var(--teal));}
+  .toggle-row.on .switch::after{transform:translateX(18px);background:#4a3b3f;}
+  .toggle-body{
+    display:none;
+    padding:0 14px 14px;
+  }
+  .toggle-row.on .toggle-body{display:block;}
+
+  .switch-line{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:2px 0 14px;
+  }
+  .switch-line span{font-size:14.5px;}
+
+  .btn-primary{
+    width:100%;
+    border:none;
+    background:var(--amber-dark);
+    color:#ffffff;
+    font-family:'Sora',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    padding:15px 0;
+    border-radius:12px;
+    cursor:pointer;
+    margin-top:6px;
+  }
+  .btn-secondary{
+    width:100%;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--text-muted);
+    font-family:'Sora',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    padding:13px 0;
+    border-radius:12px;
+    cursor:pointer;
+    margin-top:10px;
+  }
+
+  .panel{
+    border:1px solid var(--amber);
+    border-radius:var(--radius);
+    padding:22px 20px;
+    background:radial-gradient(120% 140% at 0% 0%, rgba(240,169,78,.08), transparent 60%);
+  }
+  .panel-tag{
+    display:flex;align-items:center;gap:8px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:1.5px;
+    color:var(--teal);
+    margin-bottom:16px;
+  }
+  .panel-tag .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);}
+  .panel p.label{margin:0 0 4px;font-size:13px;color:var(--text-muted);}
+  .price{
+    font-family:'JetBrains Mono',monospace;
+    font-size:42px;
+    font-weight:700;
+    color:var(--amber);
+    margin:0 0 18px;
+    letter-spacing:-1px;
+  }
+  .grid4{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .mini{
+    background:var(--bg-input);
+    border:1px solid var(--border-soft);
+    border-radius:10px;
+    padding:12px 13px;
+  }
+  .mini p.label{font-size:11.5px;margin:0 0 4px;color:var(--text-muted);}
+  .mini .val{
+    font-family:'JetBrains Mono',monospace;
+    font-size:17px;
+    color:var(--teal);
+    font-weight:600;
+  }
+  .mini .sub{font-size:11px;color:#b8949a;margin-top:3px;}
+
+  footer{
+    text-align:center;
+    margin-top:26px;
+    font-size:12px;
+    color:#b8949a;
+    line-height:1.6;
+  }
+  footer a{color:var(--amber);text-decoration:none;}
+
+  @media print{
+    body *{visibility:hidden;}
+    .panel, .panel *{visibility:visible;}
+    .panel{position:absolute;top:0;left:0;right:0;border-color:#333;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="brand">
+    <div class="brand-mark">3D</div>
+    <div class="brand-text">
+      <h1>Calculadora de Preços</h1>
+      <p>Para quem imprime e vende em Portugal — tudo em euros.</p>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button id="tabBasico" class="active">Básico</button>
+    <button id="tabPro">Profissional</button>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="card">
+    <div class="step-tag"><span class="num">PASSO 01</span><h2>Impressora e material</h2></div>
+
+    <label for="printer">Impressora</label>
+    <select id="printer">
+      <option value="170">Bambu Lab A1 · 170W</option>
+      <option value="180">Bambu Lab A1 Combo · 180W</option>
+      <option value="220">Bambu Lab P1S · 220W</option>
+      <option value="350">Bambu Lab X1C · 350W</option>
+      <option value="120">Prusa MK4 · 120W</option>
+      <option value="270">Creality Ender 3 V3 · 270W</option>
+      <option value="150">Anycubic Kobra 2 · 150W</option>
+      <option value="custom">Outra (indicar watts)</option>
+    </select>
+    <div id="customWattWrap" style="display:none;">
+      <label for="customWatt">Potência da tua impressora (W)</label>
+      <input type="number" id="customWatt" placeholder="Ex: 200">
+    </div>
+
+    <label for="material">Material</label>
+    <select id="material">
+      <option value="">Seleciona um material</option>
+      <option>PLA</option>
+      <option>PLA-CF</option>
+      <option>PETG</option>
+      <option>ABS</option>
+      <option>ASA</option>
+      <option>TPU</option>
+      <option>Nylon</option>
+    </select>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card">
+    <div class="step-tag"><span class="num">PASSO 02</span><h2>Dados da peça</h2></div>
+
+    <label for="partName">Nome do orçamento</label>
+    <input type="text" id="partName" placeholder="Ex: Suporte de telemóvel">
+
+    <div class="row2">
+      <div>
+        <label for="hours">Tempo — horas</label>
+        <input type="number" id="hours" placeholder="Ex: 2">
+      </div>
+      <div>
+        <label for="minutes">Tempo — minutos</label>
+        <input type="number" id="minutes" placeholder="Ex: 30">
+      </div>
+    </div>
+
+    <label for="weight">Peso do filamento usado (g)</label>
+    <input type="number" id="weight" placeholder="Ex: 45">
+    <p class="hint">Peso de 1 peça. Se imprimires várias juntas na mesma mesa, indica em "Tempo" o tempo total dessa impressão.</p>
+
+    <label for="quantity">Quantidade de peças</label>
+    <input type="number" id="quantity" placeholder="Ex: 1" value="1" min="1">
+    <p class="hint">Usa isto para ver o custo e preço de uma fornada inteira, não só de 1 peça.</p>
+
+    <label for="filamentPrice">Preço do filamento (€/kg)</label>
+    <input type="number" id="filamentPrice" placeholder="Ex: 22.90">
+
+    <label for="kwhPrice">Preço do kWh (€)</label>
+    <input type="number" id="kwhPrice" placeholder="Ex: 0.18">
+    <p class="hint">Valor médio em Portugal ronda os 0,15–0,20 €/kWh — confere na tua fatura.</p>
+  </div>
+
+  <!-- STEP 3 (PRO) -->
+  <div class="card" id="proCard" style="display:none;">
+    <div class="step-tag"><span class="num">PRO</span><h2>Custos profissionais</h2></div>
+    <p class="hint" style="margin:-8px 0 14px;">Ativa só o que fizer sentido para o teu negócio — o que estiver desligado não entra na conta.</p>
+
+    <div class="toggle-row" data-toggle="wear">
+      <div class="toggle-head"><span>Desgaste da máquina (€)</span><div class="switch"></div></div>
+      <div class="toggle-body">
+        <label for="wearValue" style="margin-top:0;">Desgaste real (€) — opcional</label>
+        <input type="number" id="wearValue" placeholder="Ex: 0.30">
+        <p class="hint">Bico, correias, manutenção. Deixa em branco se ainda não tens noção.</p>
+
+        <p class="hint" style="margin-top:16px;">+ encargo da máquina (prestação/renda):</p>
+        <label for="wearMonthly">Mensalidade (€/mês)</label>
+        <input type="number" id="wearMonthly" placeholder="Ex: 54">
+        <div class="row2">
+          <div>
+            <label for="wearWorkDays">Dias úteis/mês</label>
+            <input type="number" id="wearWorkDays" placeholder="Ex: 22" value="22">
+          </div>
+          <div>
+            <label for="wearPrintsPerDay">Impressões neste dia</label>
+            <input type="number" id="wearPrintsPerDay" placeholder="Ex: 1" value="1">
+          </div>
+        </div>
+        <p class="hint" id="wearRateHint">O valor da mensalidade é dividido pelos dias úteis e, depois, pelas impressões desse dia.</p>
+      </div>
+    </div>
+
+    <div class="toggle-row" data-toggle="prep">
+      <div class="toggle-head"><span>Tempo de preparo</span><div class="switch"></div></div>
+      <div class="toggle-body">
+        <div class="row2">
+          <div>
+            <label for="prepMinutes">Minutos</label>
+            <input type="number" id="prepMinutes" placeholder="Ex: 15">
+          </div>
+          <div>
+            <label for="prepRate">Tua hora (€/h)</label>
+            <input type="number" id="prepRate" placeholder="Ex: 8">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toggle-row" data-toggle="fail">
+      <div class="toggle-head"><span>Margem de falha (%)</span><div class="switch"></div></div>
+      <div class="toggle-body">
+        <input type="number" id="failValue" placeholder="Ex: 10">
+      </div>
+    </div>
+
+    <div class="toggle-row" data-toggle="packaging">
+      <div class="toggle-head"><span>Embalagem (€)</span><div class="switch"></div></div>
+      <div class="toggle-body">
+        <input type="number" id="packagingValue" placeholder="Ex: 1.20">
+      </div>
+    </div>
+
+    <div class="toggle-row" data-toggle="materials">
+      <div class="toggle-head"><span>Materiais e consumíveis (€)</span><div class="switch"></div></div>
+      <div class="toggle-body">
+        <input type="number" id="materialsValue" placeholder="Ex: 0.80">
+      </div>
+    </div>
+
+    <div class="toggle-row" data-toggle="etsy">
+      <div class="toggle-head"><span>Taxa Etsy (%)</span><div class="switch"></div></div>
+      <div class="toggle-body">
+        <input type="number" id="etsyValue" placeholder="Ex: 6.5">
+        <p class="hint">Comissão + processamento de pagamento, aproximado.</p>
+      </div>
+    </div>
+
+    <div class="toggle-row" data-toggle="vinted">
+      <div class="toggle-head"><span>Taxa Vinted (%)</span><div class="switch"></div></div>
+      <div class="toggle-body">
+        <input type="number" id="vintedValue" placeholder="Ex: 5">
+      </div>
+    </div>
+
+    <div class="toggle-row" data-toggle="shipping">
+      <div class="toggle-head"><span>Portes / CTT (€)</span><div class="switch"></div></div>
+      <div class="toggle-body">
+        <input type="number" id="shippingValue" placeholder="Ex: 3.50">
+      </div>
+    </div>
+
+    <div class="toggle-row" data-toggle="taxes">
+      <div class="toggle-head"><span>Impostos (%)</span><div class="switch"></div></div>
+      <div class="toggle-body">
+        <input type="number" id="taxesValue" placeholder="Ex: 21">
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3/4 margin -->
+  <div class="card">
+    <div class="step-tag"><span class="num">PASSO 03</span><h2>Margem de lucro</h2></div>
+
+    <label for="marginPercent">Margem de lucro (%)</label>
+    <input type="number" id="marginPercent" placeholder="Ex: 100">
+
+    <label for="marginFixed">Valor fixo (€)</label>
+    <input type="number" id="marginFixed" placeholder="Ex: 5.00">
+    <p class="hint">Preenche apenas um dos dois — ao usar um, o outro fica bloqueado.</p>
+
+    <div class="switch-line" style="margin-top:16px;">
+      <span>Arredondar para ,99 acima</span>
+      <div class="switch" id="roundSwitch"></div>
+    </div>
+
+    <button class="btn-primary" id="calcBtn">Calcular preço</button>
+    <button class="btn-secondary" id="clearBtn">Limpar tudo</button>
+  </div>
+
+  <!-- RESULT PANEL -->
+  <div class="panel">
+    <div class="panel-tag"><span class="dot"></span>PAINEL DE ORÇAMENTO</div>
+    <p class="label">Preço por peça</p>
+    <p class="price" id="finalPrice">€ 0,00</p>
+    <p class="label" id="orderTotalLine" style="display:none;margin-top:-10px;margin-bottom:18px;"></p>
+
+    <div class="grid4">
+      <div class="mini">
+        <p class="label">Filamento</p>
+        <div class="val" id="filamentCostOut">€ 0,00</div>
+        <div class="sub" id="filamentWeightOut">0 g usados</div>
+      </div>
+      <div class="mini">
+        <p class="label">Energia</p>
+        <div class="val" id="energyCostOut">€ 0,00</div>
+        <div class="sub" id="energyKwhOut">0,00 kWh</div>
+      </div>
+      <div class="mini">
+        <p class="label">Custo total</p>
+        <div class="val" id="totalCostOut">€ 0,00</div>
+      </div>
+      <div class="mini">
+        <p class="label">Lucro</p>
+        <div class="val" id="profitOut">€ 0,00</div>
+      </div>
+    </div>
+
+    <button class="btn-secondary" id="copyBtn" style="border-color:var(--amber);color:var(--amber);">Copiar orçamento para o WhatsApp</button>
+    <button class="btn-secondary" id="pdfBtn">Exportar orçamento (PDF)</button>
+  </div>
+
+  <footer>
+    Feito em Portugal 🇵🇹 · edita este ficheiro para pores o teu nome e Instagram.<br>
+    <a href="#" id="igLink">@oteuprojeto3d</a>
+  </footer>
+</div>
+
+<script>
+  // ---- tabs ----
+  const tabBasico = document.getElementById('tabBasico');
+  const tabPro = document.getElementById('tabPro');
+  const proCard = document.getElementById('proCard');
+  tabBasico.onclick = () => { tabBasico.classList.add('active'); tabPro.classList.remove('active'); proCard.style.display='none'; };
+  tabPro.onclick = () => { tabPro.classList.add('active'); tabBasico.classList.remove('active'); proCard.style.display='block'; };
+
+  // ---- printer watt ----
+  const printerSel = document.getElementById('printer');
+  const customWattWrap = document.getElementById('customWattWrap');
+  printerSel.onchange = () => { customWattWrap.style.display = printerSel.value === 'custom' ? 'block' : 'none'; };
+
+  // ---- generic switches (pro toggle rows) ----
+  document.querySelectorAll('.toggle-row').forEach(row => {
+    row.querySelector('.toggle-head').addEventListener('click', () => row.classList.toggle('on'));
+  });
+
+  // ---- round switch ----
+  const roundSwitch = document.getElementById('roundSwitch');
+  let roundOn = true;
+  roundSwitch.classList.add('on-init');
+  roundSwitch.style.background = 'linear-gradient(135deg,var(--amber),var(--teal))';
+  roundSwitch.style.setProperty('--x','18px');
+  function paintRoundSwitch(){
+    roundSwitch.style.background = roundOn ? 'linear-gradient(135deg,var(--amber),var(--teal))' : '#3a4148';
+  }
+  roundSwitch.addEventListener('click', () => { roundOn = !roundOn; paintRoundSwitch(); });
+  // simple dot via pseudo not directly controllable inline, so use a real child element instead:
+  roundSwitch.innerHTML = '';
+  const rDot = document.createElement('div');
+  rDot.style.cssText = 'width:18px;height:18px;border-radius:50%;background:#ffffff;position:absolute;top:3px;transition:left .18s ease;';
+  roundSwitch.style.position='relative';
+  roundSwitch.appendChild(rDot);
+  function positionDot(){ rDot.style.left = roundOn ? '21px' : '3px'; rDot.style.background = roundOn ? '#4a3b3f' : '#ffffff'; }
+  roundSwitch.addEventListener('click', positionDot);
+  positionDot();
+
+  // ---- live preview for machine wear (encargo + desgaste) ----
+  function updateWearHint(){
+    const monthly = num('wearMonthly');
+    const workDays = num('wearWorkDays') || 22;
+    const printsPerDay = num('wearPrintsPerDay') || 1;
+    const direct = num('wearValue');
+    const hint = document.getElementById('wearRateHint');
+    if(monthly > 0){
+      const dailyCost = monthly / workDays;
+      const perPrint = dailyCost / printsPerDay;
+      const total = perPrint + direct;
+      hint.textContent = `≈ ${eur(dailyCost)}/dia → ${eur(perPrint)} por impressão` + (direct>0 ? ` + ${eur(direct)} desgaste = ${eur(total)} no total` : '');
+      hint.style.color = 'var(--teal)';
+    } else {
+      hint.textContent = 'O valor da mensalidade é dividido pelos dias úteis e, depois, pelas impressões desse dia.';
+      hint.style.color = '';
+    }
+  }
+  ['wearMonthly','wearWorkDays','wearPrintsPerDay','wearValue'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateWearHint);
+  });
+
+  // ---- mutual exclusivity margin fields ----
+  const marginPercent = document.getElementById('marginPercent');
+  const marginFixed = document.getElementById('marginFixed');
+  marginPercent.addEventListener('input', () => { marginFixed.disabled = marginPercent.value !== ''; if(marginPercent.value!=='') marginFixed.value=''; });
+  marginFixed.addEventListener('input', () => { marginPercent.disabled = marginFixed.value !== ''; if(marginFixed.value!=='') marginPercent.value=''; });
+
+  // ---- helpers ----
+  const num = id => parseFloat(document.getElementById(id).value) || 0;
+  const isOn = key => document.querySelector(`.toggle-row[data-toggle="${key}"]`).classList.contains('on');
+  const eur = v => '€ ' + v.toLocaleString('pt-PT', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  let lastResult = null;
+
+  function calculate(){
+    const watt = printerSel.value === 'custom' ? num('customWatt') : parseFloat(printerSel.value);
+    const totalHours = num('hours') + (num('minutes')/60); // tempo da impressão toda (fornada)
+    const qty = Math.max(1, num('quantity') || 1);
+    const weightTotalG = num('weight') * qty; // peso é por peça
+    const weightKg = weightTotalG/1000;
+
+    const filamentCost = weightKg * num('filamentPrice');
+    const kwhUsed = (watt/1000) * totalHours; // energia depende do tempo da fornada, não da quantidade
+    const energyCost = kwhUsed * num('kwhPrice');
+
+    // custos que dependem do tempo da fornada (não multiplicam por quantidade)
+    let batchCost = energyCost;
+    // custos que são por peça (multiplicam por quantidade)
+    let perPieceCost = filamentCost;
+
+    let percentFees = 0;
+
+    if(proCard.style.display !== 'none'){
+      if(isOn('wear')){
+        batchCost += num('wearValue'); // desgaste real, opcional
+        const monthly = num('wearMonthly');
+        const workDays = num('wearWorkDays') || 22;
+        const printsPerDay = num('wearPrintsPerDay') || 1;
+        if(monthly > 0){
+          batchCost += (monthly / workDays) / printsPerDay; // encargo da máquina
+        }
+      }
+      if(isOn('prep')) batchCost += (num('prepMinutes')/60) * num('prepRate');
+      if(isOn('packaging')) perPieceCost += num('packagingValue') * qty;
+      if(isOn('materials')) perPieceCost += num('materialsValue') * qty;
+      if(isOn('shipping')) perPieceCost += num('shippingValue') * qty;
+      if(isOn('etsy')) percentFees += num('etsyValue');
+      if(isOn('vinted')) percentFees += num('vintedValue');
+      if(isOn('taxes')) percentFees += num('taxesValue');
+    }
+
+    let cost = batchCost + perPieceCost; // custo total da fornada
+    if(proCard.style.display !== 'none' && isOn('fail')) cost = cost * (1 + num('failValue')/100);
+
+    let profit = 0;
+    if(marginPercent.value !== '') profit = cost * (num('marginPercent')/100);
+    else if(marginFixed.value !== '') profit = num('marginFixed') * qty;
+
+    let subtotal = cost + profit;
+    let totalBeforeRound = percentFees > 0 && percentFees < 100 ? subtotal / (1 - percentFees/100) : subtotal;
+
+    // preço por peça, depois arredondado — o total da encomenda sai daí
+    let unitPrice = totalBeforeRound / qty;
+
+    if(roundOn){
+      const base = Math.floor(unitPrice);
+      let candidate = base + 0.99;
+      if(candidate < unitPrice) candidate += 1;
+      unitPrice = candidate;
+    }
+
+    const orderTotal = unitPrice * qty;
+    const realProfit = orderTotal - cost;
+
+    lastResult = {
+      partName: document.getElementById('partName').value || 'Peça sem nome',
+      qty, totalHours, weightG: num('weight'), weightTotalG, filamentCost, energyCost, kwhUsed,
+      cost, unitPrice, orderTotal, realProfit
+    };
+
+    document.getElementById('finalPrice').textContent = eur(unitPrice);
+    const orderLine = document.getElementById('orderTotalLine');
+    if(qty > 1){
+      orderLine.style.display = 'block';
+      orderLine.textContent = `Encomenda de ${qty} peças → total: ${eur(orderTotal)}`;
+    } else {
+      orderLine.style.display = 'none';
+    }
+    document.getElementById('filamentCostOut').textContent = eur(filamentCost);
+    document.getElementById('filamentWeightOut').textContent = weightTotalG + ' g usados';
+    document.getElementById('energyCostOut').textContent = eur(energyCost);
+    document.getElementById('energyKwhOut').textContent = kwhUsed.toFixed(2) + ' kWh';
+    document.getElementById('totalCostOut').textContent = eur(cost);
+    document.getElementById('profitOut').textContent = eur(realProfit);
+  }
+
+  document.getElementById('calcBtn').onclick = calculate;
+
+  document.getElementById('clearBtn').onclick = () => {
+    document.querySelectorAll('input').forEach(i => i.value = '');
+    document.querySelectorAll('.toggle-row.on').forEach(r => r.classList.remove('on'));
+    marginPercent.disabled = false; marginFixed.disabled = false;
+    calculate();
+  };
+
+  document.getElementById('copyBtn').onclick = () => {
+    if(!lastResult) calculate();
+    const r = lastResult;
+    const qtyLine = r.qty > 1 ? `Quantidade: ${r.qty} peças\n` : '';
+    const totalLine = r.qty > 1 ? `Total da encomenda: ${eur(r.orderTotal)}\n` : '';
+    const text = `🖨️ Orçamento — ${r.partName}\n` +
+      `Tempo de impressão: ${Math.floor(r.totalHours)}h ${Math.round((r.totalHours%1)*60)}min\n` +
+      qtyLine +
+      `Filamento usado: ${r.weightTotalG} g\n` +
+      `Preço por peça: ${eur(r.unitPrice)}\n` +
+      totalLine +
+      `\nFeito com uma impressora 3D 🇵🇹`;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      const original = btn.textContent;
+      btn.textContent = 'Copiado ✓';
+      setTimeout(() => btn.textContent = original, 1600);
+    });
+  };
+
+  document.getElementById('pdfBtn').onclick = () => { if(!lastResult) calculate(); window.print(); };
+
+  calculate();
+</script>
+</body>
+</html>
